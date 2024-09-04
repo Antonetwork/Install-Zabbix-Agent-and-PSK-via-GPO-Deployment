@@ -1,7 +1,7 @@
 @echo off
 
 REM Define the path to the MSI file
-set "MSI_PATH=\\adresse_ip_du_serveur_zabbix\Partage\zabbix_agent-7.0.3-windows-amd64-openssl.msi"
+set "MSI_PATH=\\adresse_ip\Partage\zabbix_agent-7.0.3-windows-amd64-openssl.msi"
 
 REM Define installation parameters
 set ZABBIX_SERVER=adresse_ip_du_serveur_zabbix
