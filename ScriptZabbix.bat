@@ -1,24 +1,41 @@
 @echo off
 
-REM Define the path to the MSI file
-set "MSI_PATH=\\adresse_ip\Partage\zabbix_agent-7.0.3-windows-amd64-openssl.msi"
+REM Définit le chemin du fichier MSI (à modifier selon votre environnement)
+set "MSI_PATH=\\chemin\vers\le\fichier\zabbix_agent-7.0.3-windows-amd64-openssl.msi"
 
-REM Define installation parameters
-set ZABBIX_SERVER=adresse_ip_du_serveur_zabbix
+REM Définit les paramètres d'installation personnalisés
+set ZABBIX_SERVER=adresse_du_serveur
 set AGENT_HOSTNAME=%COMPUTERNAME%
-set INSTALL_PATH="C:\Program Files\Zabbix Agent"
+set HOST_METADATA=metadata_personnalise
+set TLSPSK_IDENTITY=identifiant_psk
+set TLSPSK_VALUE=valeur_psk
 
-REM Check if the Zabbix Agent service is already installed
-sc query "Zabbix Agent" >nul 2>&1
+REM Installe l'agent Zabbix avec les paramètres
+msiexec /i "%MSI_PATH%" /quiet /norestart /log "%temp%\zabbix_agent_install.log" ^
+ENABLEREMOTECOMMANDS=1 ^
+SERVER=%ZABBIX_SERVER% ^
+SERVERACTIVE=%ZABBIX_SERVER% ^
+HOSTNAME=%AGENT_HOSTNAME% ^
+HOSTMETADATA=%HOST_METADATA% ^
+TLSCONNECT=psk ^
+TLSACCEPT=psk ^
+TLSPSKIDENTITY=%TLSPSK_IDENTITY% ^
+TLSPSKVALUE=%TLSPSK_VALUE%
 
-if %errorlevel% == 0 (
-    echo Zabbix Agent is already installed. Exiting script.
-    exit /b 0
-) else (
-    REM Install the Zabbix Agent
-    msiexec /i "%MSI_PATH%" /quiet /norestart /log "%temp%\zabbix_agent_install.log" SERVER=%ZABBIX_SERVER% HOSTNAME=%AGENT_HOSTNAME% INSTALLFOLDER=%INSTALL_PATH%
-
-    REM Start and configure the Zabbix Agent service
-    sc start "Zabbix Agent"
-    sc config "Zabbix Agent" start= auto
+REM Vérifie le statut de l'installation
+if %ERRORLEVEL% neq 0 (
+    echo Une erreur est survenue pendant l'installation.
+    pause
 )
+
+REM Configure le service Zabbix pour démarrer automatiquement
+sc config "Zabbix Agent" start= auto
+
+REM Attendre 20 secondes avant de démarrer le service
+timeout /t 20 /nobreak
+
+REM Démarre le service Zabbix Agent
+sc start "Zabbix Agent"
+
+REM Empêche la fermeture automatique de la fenêtre CMD
+pause
