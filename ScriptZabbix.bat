@@ -1,14 +1,19 @@
 @echo off
 
-REM Définit le chemin du fichier MSI (à modifier selon votre environnement)
-set "MSI_PATH=\\chemin\vers\le\fichier\zabbix_agent-7.0.3-windows-amd64-openssl.msi"
+REM Définit le chemin du fichier MSI
+set "MSI_PATH=\\192.168.13.123\Users\Administrateur\Desktop\Partage\zabbix_agent-7.0.3-windows-amd64-openssl (1).msi"
 
 REM Définit les paramètres d'installation personnalisés
-set ZABBIX_SERVER=adresse_du_serveur
+set ZABBIX_SERVER=192.168.13.119
 set AGENT_HOSTNAME=%COMPUTERNAME%
-set HOST_METADATA=metadata_personnalise
-set TLSPSK_IDENTITY=identifiant_psk
-set TLSPSK_VALUE=valeur_psk
+set HOST_METADATA=Debian
+set TLSPSK_IDENTITY=Zabbix
+
+REM Génère la clé PSK à l'aide du script PowerShell
+for /f "delims=" %%i in ('powershell -ExecutionPolicy Bypass -File "\\192.168.13.123\Users\Administrateur\Desktop\Partage\GeneratePSK.ps1"') do set "TLSPSK_VALUE=%%i"
+
+REM Affiche la clé PSK générée pour vérification
+echo La clé PSK générée est : %TLSPSK_VALUE%
 
 REM Installe l'agent Zabbix avec les paramètres
 msiexec /i "%MSI_PATH%" /quiet /norestart /log "%temp%\zabbix_agent_install.log" ^
